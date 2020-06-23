@@ -1,25 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
+import Routeri from './router';
+import Axios from 'axios';
+
+
 
 function App() {
+
+  //Check if we have a previsly saved token in localstorage
+  const checkIsAuth = () => {
+    const userData = localStorage.getItem("userData")
+    if (userData) {
+      const parsedUserData = JSON.parse(userData)
+      return parsedUserData.jwt
+    }
+  }
+
+  const Token = checkIsAuth()
+
+  //If token exists we set to default header for future requests
+  if (Token){
+    Axios.defaults.headers.common['Authorization'] = "Bearer " + Token;
+  }
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!Token)
+
+  function login(data) {
+    localStorage.setItem("userData", JSON.stringify(data))
+    Axios.defaults.headers.common['Authorization'] = "Bearer " + data.jwt;
+    setIsAuthenticated(true)
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Routeri isAuthenticated={isAuthenticated} login={login} />
   );
 }
 
